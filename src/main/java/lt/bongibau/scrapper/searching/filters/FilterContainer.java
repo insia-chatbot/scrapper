@@ -2,7 +2,6 @@ package lt.bongibau.scrapper.searching.filters;
 
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.net.URI;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -10,15 +9,15 @@ import java.util.List;
 public class FilterContainer {
     private final List<Filter> filters;
 
-    private final Filter.Type defaultPolicy;
+    private final DomainFilter.Type defaultPolicy;
 
-    public FilterContainer(List<Filter> filters, Filter.Type defaultPolicy) {
+    public FilterContainer(List<Filter> filters, DomainFilter.Type defaultPolicy) {
         this.filters = filters;
         this.defaultPolicy = defaultPolicy;
     }
 
     public FilterContainer(List<Filter> filters) {
-        this(filters, Filter.Type.DENY);
+        this(filters, DomainFilter.Type.DENY);
     }
 
     /**
@@ -31,14 +30,14 @@ public class FilterContainer {
     public boolean check(URL url) {
         for (Filter filter : filters) {
             if (filter.check(url)) {
-                return filter.type() == Filter.Type.ACCEPT;
+                return filter.getType() == DomainFilter.Type.ACCEPT;
             }
         }
 
-        return defaultPolicy == Filter.Type.ACCEPT;
+        return defaultPolicy == DomainFilter.Type.ACCEPT;
     }
 
-    public Filter.Type getDefaultPolicy() {
+    public DomainFilter.Type getDefaultPolicy() {
         return defaultPolicy;
     }
 
