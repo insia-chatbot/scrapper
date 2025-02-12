@@ -16,6 +16,7 @@ public class Scrapper {
                 new PathFilter("login", DomainFilter.Type.DENY),
                 new PathFilter("logout", DomainFilter.Type.DENY),
                 new PathFilter("_authenticate", DomainFilter.Type.DENY),
+                new PathFilter("calendar", DomainFilter.Type.DENY),
                 new DomainFilter("moodle.insa-toulouse.fr", DomainFilter.Type.ACCEPT)
         ));
 
