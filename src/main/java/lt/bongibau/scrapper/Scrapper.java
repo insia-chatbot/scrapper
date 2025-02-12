@@ -18,17 +18,17 @@ public class Scrapper {
                 new PathFilter("logout", DomainFilter.Type.DENY),
                 new PathFilter("_authenticate", DomainFilter.Type.DENY),
                 new PathFilter("calendar", DomainFilter.Type.DENY),
-                new DomainFilter("moodle.insa-toulouse.fr", DomainFilter.Type.ACCEPT)
+                new DomainFilter("insa-toulouse.fr", DomainFilter.Type.ACCEPT)
         ));
 
         SearchManager searchManager = new SearchManager(
-                List.of(new URL("https://moodle.insa-toulouse.fr")),
+                List.of(new URL("https://www.insa-toulouse.fr/")),
                 filters
         );
 
         List<URL> links = searchManager.start(16);
 
-        File file = new File("moodle.insa-toulouse.txt");
+        File file = new File("data.txt");
         file.createNewFile();
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));

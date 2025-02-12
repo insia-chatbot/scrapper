@@ -1,17 +1,21 @@
 package lt.bongibau.scrapper.searching;
 
 import lt.bongibau.scrapper.ScrapperLogger;
+import lt.bongibau.scrapper.database.Data;
+import lt.bongibau.scrapper.database.DatabaseInterface;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -113,16 +117,43 @@ public class Searcher extends Thread {
                 ScrapperLogger.log(Level.SEVERE, "Failed to read content from: " + url, e);
             }
 
+
+            Document document = Jsoup.parse(content.toString());
+            String lastModified = connection.getHeaderField("Last-Modified");
+            LocalDateTime modificationDate = null;
+
+            if (lastModified != null) {
+                try {
+                    DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME; // Format RFC 1123
+                    modificationDate = LocalDateTime.ofInstant(
+                            formatter.parse(lastModified, java.time.Instant::from),
+                            ZoneId.of("UTC") // Adapter si nécessaire
+                    );
+                    ScrapperLogger.log("Last modified: " + modificationDate);
+                } catch (DateTimeParseException e) {
+                    ScrapperLogger.log(Level.WARNING, "Failed to parse Last-Modified date: " + lastModified, e);
+                }
+            }else ScrapperLogger.log(Level.INFO, "No Last-Modified header found for URL: " + url);
+
+            String pageText= document.text();
+            assert lastModified != null;
+            Data data = new Data(url.toString(), pageText, modificationDate, LocalDateTime.now());
+            DatabaseInterface.getInstance().insertData(data);
+
             try {
-                Document document = Jsoup.parse(content.toString());
                 List<String> links = document.select("a").stream().map((a) -> a.attr("href")).toList();
                 this.notifyAll(url, links);
             } catch (Exception e) {
                 ScrapperLogger.log(Level.SEVERE, "Failed to parse content from: " + url, e);
             }
+
+
+
         }
 
         ScrapperLogger.log("Searcher stopped.");
+
+
     }
 
     public synchronized void setPhase(Searcher.Phase phase) {
