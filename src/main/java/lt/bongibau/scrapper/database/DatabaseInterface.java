@@ -23,7 +23,7 @@ public class DatabaseInterface {
     public void createTables() {
         try {
             Statement statement = this.connection.createStatement();
-            statement.execute("CREATE TABLE IF NOT EXISTS DATA (id INTEGER AUTOINCREMENT PRIMARY KEY,url TEXT, content TEXT, modificationDate TEXT, viewingDate TEXT)");
+            statement.execute("CREATE TABLE IF NOT EXISTS DATA (id INTEGER PRIMARY KEY AUTOINCREMENT,url TEXT, content TEXT, modificationDate TEXT, viewingDate TEXT)");
             statement.close();
         }catch (SQLException e){
             System.out.println(e.getMessage());
@@ -35,7 +35,8 @@ public class DatabaseInterface {
             PreparedStatement preparedStatement = this.connection.prepareStatement(query);
             preparedStatement.setString(1, data.url());
             preparedStatement.setString(2, data.content());
-            preparedStatement.setString(3, data.modificationDate().toString());
+            if(data.modificationDate()!=null)preparedStatement.setString(3, data.modificationDate().toString());
+            else preparedStatement.setNull(3, Types.VARCHAR);
             preparedStatement.setString(4, data.viewingDate().toString());
             preparedStatement.execute();
             preparedStatement.close();
