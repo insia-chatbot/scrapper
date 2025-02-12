@@ -1,6 +1,6 @@
 package lt.bongibau.scrapper.database;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
-public record Data(String url, String content, Date modificationDate, Date viewingDate) {
+public record Data(String url, String content, LocalDateTime modificationDate, LocalDateTime viewingDate) {
 }
