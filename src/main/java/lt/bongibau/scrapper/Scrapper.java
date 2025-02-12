@@ -1,5 +1,6 @@
 package lt.bongibau.scrapper;
 
+import lt.bongibau.scrapper.database.DatabaseInterface;
 import lt.bongibau.scrapper.searching.SearchManager;
 import lt.bongibau.scrapper.searching.filters.DomainFilter;
 import lt.bongibau.scrapper.searching.filters.Filter;
@@ -39,5 +40,7 @@ public class Scrapper {
         }
 
         writer.close();
+
+        DatabaseInterface.getInstance().close();
     }
 }
