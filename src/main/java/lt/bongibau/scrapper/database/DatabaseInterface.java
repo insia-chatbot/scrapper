@@ -46,6 +46,16 @@ public class DatabaseInterface {
 
     }
 
+    public void deleteData(){
+        try {
+            Statement statement = this.connection.createStatement();
+            statement.execute("DELETE FROM DATA");
+            statement.close();
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
     public static DatabaseInterface getInstance() {
         return instance;
     }

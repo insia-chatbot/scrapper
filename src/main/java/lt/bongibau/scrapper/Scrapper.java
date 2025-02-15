@@ -26,6 +26,8 @@ public class Scrapper {
                 filters
         );
 
+        DatabaseInterface.getInstance().deleteData();
+
         List<URL> links = searchManager.start(16);
 
         File file = new File("data.txt");
