@@ -6,12 +6,12 @@ import lt.bongibau.scrapper.database.DatabaseInterface;
 import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -26,7 +26,7 @@ public class Searcher extends Thread {
         IDLE
     }
 
-    public static interface Observer {
+    public interface Observer {
         /**
          * Called when the searcher finds links on a page,
          * basically when the searcher is working and finished
@@ -126,7 +126,7 @@ public class Searcher extends Thread {
                 try {
                     DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME; // Format RFC 1123
                     modificationDate = LocalDateTime.ofInstant(
-                            formatter.parse(lastModified, java.time.Instant::from),
+                            formatter.parse(lastModified, Instant::from),
                             ZoneId.of("UTC") // Adapter si nécessaire
                     );
                     ScrapperLogger.log("Last modified: " + modificationDate);
@@ -135,7 +135,25 @@ public class Searcher extends Thread {
                 }
             }else ScrapperLogger.log(Level.INFO, "No Last-Modified header found for URL: " + url);
 
-            String pageText= document.text();
+            String pageText;
+            String contentType = connection.getContentType();
+            if(contentType != null && contentType.contains("application/pdf")) {
+                try {
+                    InputStream inputStream= url.openStream();
+                    PDDocument documentPdf = PDDocument.load(inputStream);
+                    PDFTextStripper pdfStripper = new PDFTextStripper();
+                    pageText = pdfStripper.getText(documentPdf);
+                    documentPdf.close();
+                    inputStream.close();
+                    ScrapperLogger.log("The PDF content has been read successfully.");
+                }catch (IOException e) {
+                    ScrapperLogger.log(Level.SEVERE, "Failed to read PDF content from: " + url, e);
+                    continue;
+
+                }
+            } else {
+                pageText = document.text();
+            }
             assert lastModified != null;
             Data data = new Data(url.toString(), pageText, modificationDate, LocalDateTime.now());
             DatabaseInterface.getInstance().insertData(data);
@@ -146,6 +164,8 @@ public class Searcher extends Thread {
             } catch (Exception e) {
                 ScrapperLogger.log(Level.SEVERE, "Failed to parse content from: " + url, e);
             }
+
+            connection.disconnect();
 
 
 
