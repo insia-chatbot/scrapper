@@ -1,6 +1,5 @@
 package lt.bongibau.scrapper.converter;
 
-import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 
@@ -13,7 +12,7 @@ public class PDFConverter implements IConverter {
         // read the PDF file using PDFBox
 
         try {
-            PDDocument document = Loader.loadPDF(source.readAllBytes());
+            PDDocument document = PDDocument.load(source);
 
             PDFTextStripper stripper = new PDFTextStripper();
 
