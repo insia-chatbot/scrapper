@@ -148,13 +148,14 @@ public class Searcher extends Thread {
                     ScrapperLogger.log("The PDF content has been read successfully.");
                 }catch (IOException e) {
                     ScrapperLogger.log(Level.SEVERE, "Failed to read PDF content from: " + url, e);
-                    continue;
-
+                    pageText = "null";
                 }
             } else {
                 pageText = document.text();
             }
-            assert lastModified != null;
+            if(pageText.equals("null")) {
+                pageText="Failed to read content";
+            }
             Data data = new Data(url.toString(), pageText, modificationDate, LocalDateTime.now());
             DatabaseInterface.getInstance().insertData(data);
 
