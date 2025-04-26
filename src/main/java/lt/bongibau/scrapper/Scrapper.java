@@ -31,7 +31,7 @@ public class Scrapper {
 
         List<URL> links = searchManager.start(16);
 
-        File file = new File("data.txt");
+        File file = new File("insa_sites.txt");
         file.createNewFile();
 
         BufferedWriter writer = new BufferedWriter(new FileWriter(file));
