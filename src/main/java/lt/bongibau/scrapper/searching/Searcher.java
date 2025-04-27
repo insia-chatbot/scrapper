@@ -156,8 +156,13 @@ public class Searcher extends Thread {
             if(pageText.equals("null")) {
                 pageText="Failed to read content";
             }
-            Data data = new Data(url.toString(), pageText, modificationDate, LocalDateTime.now());
-            DatabaseInterface.getInstance().insertData(data);
+
+            if (pageText.trim().isEmpty() || pageText.replace("\n", "").trim().isEmpty()) {
+                ScrapperLogger.log(Level.INFO, "Page seems to be empty or contains only line breaks: " + url);
+            }else {
+                Data data = new Data(url.toString(), pageText, modificationDate, LocalDateTime.now());
+                DatabaseInterface.getInstance().insertData(data);
+            }
 
             try {
                 List<String> links = document.select("a").stream().map((a) -> a.attr("href")).toList();

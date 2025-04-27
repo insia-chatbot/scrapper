@@ -5,7 +5,7 @@ public class DatabaseInterface {
     private final static DatabaseInterface instance= new DatabaseInterface();
     private Connection connection;
     private DatabaseInterface() {
-        String url="jdbc:sqlite:data.db";
+        String url="jdbc:sqlite:data1.db";
         try {
             this.connection = DriverManager.getConnection(url);
         }catch (SQLException e){
