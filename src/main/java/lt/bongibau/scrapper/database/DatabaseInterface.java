@@ -2,12 +2,14 @@ package lt.bongibau.scrapper.database;
 
 import java.sql.*;
 public class DatabaseInterface {
+    private final static boolean remote = true;
     private final static DatabaseInterface instance= new DatabaseInterface();
     private Connection connection;
     private DatabaseInterface() {
-        String url="jdbc:sqlite:insa_sites.db";
+        String url;
         try {
-            this.connection = DriverManager.getConnection(url);
+            if(remote)this.connection = DriverManager.getConnection("jdbc:mysql://gateway01.eu-central-1.prod.aws.tidbcloud.com:4000/IAN-database","23dLGqqq48TAXKk.root","sIR0uMJnVvmqmp2F");
+            else this.connection = DriverManager.getConnection("jdbc:sqlite:insa_sites.db");
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
@@ -23,7 +25,13 @@ public class DatabaseInterface {
     public void createTables() {
         try {
             Statement statement = this.connection.createStatement();
-            statement.execute("CREATE TABLE IF NOT EXISTS DATA (id INTEGER PRIMARY KEY AUTOINCREMENT,url TEXT, content TEXT, modificationDate TEXT, viewingDate TEXT)");
+            String createTableSQL;
+            if (remote) {
+                createTableSQL = "CREATE TABLE IF NOT EXISTS DATA (id INT AUTO_INCREMENT PRIMARY KEY, url VARCHAR(2083), content TEXT, modificationDate DATETIME, viewingDate DATETIME)";
+            } else {
+                createTableSQL = "CREATE TABLE IF NOT EXISTS DATA (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, content TEXT, modificationDate TEXT, viewingDate TEXT)";
+            }
+            statement.execute(createTableSQL);
             statement.close();
         }catch (SQLException e){
             System.out.println(e.getMessage());
