@@ -14,6 +14,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedList;
@@ -122,18 +123,32 @@ public class Searcher extends Thread {
             String lastModified = connection.getHeaderField("Last-Modified");
             LocalDateTime modificationDate = null;
 
-            if (lastModified != null) {
+            String metaModified = document.select("meta[property=article:modified_time]").attr("content");
+            if (!metaModified.isEmpty()) {
                 try {
-                    DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME; // Format RFC 1123
-                    modificationDate = LocalDateTime.ofInstant(
-                            formatter.parse(lastModified, Instant::from),
-                            ZoneId.of("UTC") // Adapter si nécessaire
-                    );
-                    ScrapperLogger.log("Last modified: " + modificationDate);
+                    ZonedDateTime zonedDateTime = ZonedDateTime.parse(metaModified);
+                    modificationDate = zonedDateTime.toLocalDateTime();
+                    ScrapperLogger.log("Modification date from <meta>: " + modificationDate);
                 } catch (DateTimeParseException e) {
-                    ScrapperLogger.log(Level.WARNING, "Failed to parse Last-Modified date: " + lastModified, e);
+                    ScrapperLogger.log(Level.WARNING, "Failed to parse meta article:modified_time: " + metaModified, e);
                 }
-            }else ScrapperLogger.log(Level.INFO, "No Last-Modified header found for URL: " + url);
+            }
+
+            if (modificationDate == null) {
+                lastModified = connection.getHeaderField("Last-Modified");
+                if (lastModified != null) {
+                    try {
+                        DateTimeFormatter formatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+                        ZonedDateTime zdt = ZonedDateTime.parse(lastModified, formatter);
+                        modificationDate = zdt.toLocalDateTime();
+                        ScrapperLogger.log("Modification date from header Last-Modified: " + modificationDate);
+                    } catch (DateTimeParseException e) {
+                        ScrapperLogger.log(Level.WARNING, "Failed to parse Last-Modified header: " + lastModified, e);
+                    }
+                } else {
+                    ScrapperLogger.log(Level.INFO, "No Last-Modified header found for URL: " + url);
+                }
+            }
 
             String pageText;
             String contentType = connection.getContentType();

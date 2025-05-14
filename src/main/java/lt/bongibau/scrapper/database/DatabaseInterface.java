@@ -27,9 +27,9 @@ public class DatabaseInterface {
             Statement statement = this.connection.createStatement();
             String createTableSQL;
             if (remote) {
-                createTableSQL = "CREATE TABLE IF NOT EXISTS DATA (id INT AUTO_INCREMENT PRIMARY KEY, url VARCHAR(2083), content TEXT, modificationDate DATETIME, viewingDate DATETIME)";
+                createTableSQL = "CREATE TABLE IF NOT EXISTS DATA_WITH_MORE_DATE (id INT AUTO_INCREMENT PRIMARY KEY, url VARCHAR(2083), content TEXT, modificationDate DATETIME, viewingDate DATETIME)";
             } else {
-                createTableSQL = "CREATE TABLE IF NOT EXISTS DATA (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, content TEXT, modificationDate TEXT, viewingDate TEXT)";
+                createTableSQL = "CREATE TABLE IF NOT EXISTS DATA_WITH_MORE_DATE (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, content TEXT, modificationDate TEXT, viewingDate TEXT)";
             }
             statement.execute(createTableSQL);
             statement.close();
@@ -39,7 +39,7 @@ public class DatabaseInterface {
     }
     public synchronized void insertData(Data data) {
         try {
-            String query = "INSERT INTO DATA (url, content, modificationDate, viewingDate) VALUES(?,?,?,?)";
+            String query = "INSERT INTO DATA_WITH_MORE_DATE (url, content, modificationDate, viewingDate) VALUES(?,?,?,?)";
             PreparedStatement preparedStatement = this.connection.prepareStatement(query);
             preparedStatement.setString(1, data.url());
             preparedStatement.setString(2, data.content());
@@ -57,7 +57,7 @@ public class DatabaseInterface {
     public void deleteData(){
         try {
             Statement statement = this.connection.createStatement();
-            statement.execute("DELETE FROM DATA");
+            statement.execute("DELETE FROM DATA_WITH_MORE_DATE");
             statement.close();
         }catch (SQLException e){
             System.out.println(e.getMessage());
